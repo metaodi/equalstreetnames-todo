@@ -14,6 +14,6 @@ jobs:
         python-version: [3.8]
 
     steps:
-    - uses: ./.github/actions/update_city_data.yml
+    - uses: ./.github/workflows/update_city_data.yml
       with:
         city: zurich
