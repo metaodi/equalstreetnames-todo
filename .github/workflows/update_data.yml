@@ -12,6 +12,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: ./.github/workflows/update_city_data.yml
+    - uses: metaodi/equalstreetnames-todo/.github/workflows/update_city_data.yml@main
       with:
         city: zurich
