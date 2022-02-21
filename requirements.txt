@@ -1,0 +1,10 @@
+docopts
+geopandas
+ghapi
+matplotlib
+osm2geojson
+osmapi
+pandas
+python-dotenv
+requests
+streamlit
