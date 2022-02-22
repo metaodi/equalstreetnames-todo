@@ -24,17 +24,18 @@ st.set_page_config(page_title="EqualStreetNames - TODO", layout="wide", menu_ite
 st.title('EqualStreetNames - TODO')
 
 @st.cache(ttl=900)
-def load_data():
+def load_data(city):
     # read data.pkl from GitHub Actions Artifacts
     github_token = os.environ['GITHUB_TOKEN']
-    api = GhApi(owner='metaodi', repo='equalstreetnames-zurich-todo', token=github_token)
+    api = GhApi(owner='metaodi', repo='equalstreetnames-todo', token=github_token)
     artifacts = api.actions.list_artifacts_for_repo()['artifacts']
-    download = api.actions.download_artifact(artifact_id=artifacts[0]['id'], archive_format="zip")
+    latest_artificat = next(filter(lambda x: x['name'] == city, artifacts), {})
+    download = api.actions.download_artifact(artifact_id=latest_artificat['id'], archive_format="zip")
 
     with zipfile.ZipFile(io.BytesIO(download)) as zip_ref:
         zip_ref.extractall('.')
 
-    df = pd.read_pickle("data.pkl")
+    df = pd.read_pickle(f"data-{city}.pkl")
     return df
 
 def osm_link(r):
@@ -45,7 +46,16 @@ def wikidata_link(r, attr='wikidata'):
         return ''
     return f"<a href='https://www.wikidata.org/wiki/{r[attr]}'>{r[attr]}</a>"
 
-filtered_df = load_data().copy()
+
+# select a city
+cities = ['Zürich', 'Winterthur']
+selected_city = st.selectbox(
+    'Select a city',
+    cities,
+    index=0
+)
+
+filtered_df = load_data(selected_city).copy()
 
 
 filtered_df['osm_link'] = filtered_df.apply(osm_link, axis=1)
@@ -53,10 +63,9 @@ filtered_df['wikidata_link'] = filtered_df.apply(wikidata_link, axis=1)
 filtered_df['named_after_link'] = filtered_df.apply(wikidata_link, args=('named_after',), axis=1)
 filtered_df['name_ety_link'] = filtered_df.apply(wikidata_link, args=('name:etymology:wikidata',), axis=1)
 
+
 # display content
 st.header(f"Streets potential named after a person")
-folium_static(m)
-
 empty_name_ety = st.checkbox("Only display empty 'name:etymology:wikidata'", value=True)
 empty_named_after = st.checkbox("Only display empty 'named_after'", value=True)
 group_by_street = st.checkbox("Group by street", value=True)
