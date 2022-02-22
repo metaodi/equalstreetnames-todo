@@ -77,17 +77,22 @@ empty_name_ety = st.checkbox("Only display empty 'name:etymology:wikidata'", val
 empty_named_after = st.checkbox("Only display empty 'named_after'", value=True)
 group_by_street = st.checkbox("Group by street", value=True)
 
-if empty_name_ety:
+if empty_name_ety and 'name:etymology:wikidata' in filtered_df:
     filtered_df = filtered_df.drop(filtered_df[filtered_df['name:etymology:wikidata'].notna()].index).reset_index(drop=True)
 
 if empty_named_after:
     filtered_df = filtered_df.drop(filtered_df[filtered_df['named_after'].notna()].index).reset_index(drop=True)
 
-if group_by_street:
+if group_by_street and 'erlaeutertung' in filtered_df:
     filtered_df = filtered_df.copy()
     filtered_df = filtered_df.groupby(['name', 'erlaeutertung', 'wikidata_link', 'named_after_link', 'name_ety_link'], as_index=False).count()
     st.write(filtered_df[['name', 'erlaeutertung', 'wikidata_link', 'named_after_link', 'name_ety_link']].to_html(escape=False), unsafe_allow_html=True)
-else:
+elif group_by_street:
+    filtered_df = filtered_df.groupby(['name', 'wikidata_link', 'named_after_link', 'name_ety_link'], as_index=False).count()
+    st.write(filtered_df[['name', 'wikidata_link', 'named_after_link', 'name_ety_link']].to_html(escape=False), unsafe_allow_html=True)
+elif 'erlaeutertung' in filtered_df:
     st.write(filtered_df[['name', 'erlaeutertung', 'wikidata_link', 'named_after_link', 'osm_link', 'name_ety_link']].to_html(escape=False), unsafe_allow_html=True)
+else:
+    st.write(filtered_df[['name', 'wikidata_link', 'named_after_link', 'osm_link', 'name_ety_link']].to_html(escape=False), unsafe_allow_html=True)
 
 st.markdown('&copy; 2022 Stefan Oderbolz | [Github Repository](https://github.com/metaodi/equalstreetnames-todo)')
