@@ -20,7 +20,7 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 
-st.set_page_config(page_title="EqualStreetNames - TODO", layout="wide", menu_items=None)
+st.set_page_config(page_title="EqualStreetNames - TODO", menu_items=None)
 st.title('EqualStreetNames - TODO')
 
 @st.cache(ttl=900)
