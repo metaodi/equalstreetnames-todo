@@ -12,7 +12,7 @@ Options:
   --version                    Show version.
   -s, --street <q-number>      Q-Number of street.
   -n, --named-after <q-number> Q-Number of named after.
-  -f, --file <data-file>       Path to the CSV file [default: data.pkl].
+  -f, --file <data-file>       Path to the pickle file [default: data-zuerich.pkl].
 """
 
 import sys

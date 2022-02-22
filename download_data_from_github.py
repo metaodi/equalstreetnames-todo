@@ -8,9 +8,9 @@ Usage:
   download_data_from_github.py --version
 
 Options:
-  -c, --city <city>            Download data for the city [default: zurich].
   -h, --help                   Show this screen.
   --version                    Show version.
+  -c, --city <city>            Download data for the city [default: zurich].
 """
 
 import os

@@ -5,13 +5,14 @@
 """Update OpenStreetMap with named:etymology:wikidata tags
 
 Usage:
-  update_osm.py
+  update_osm.py [--file <data-file>]
   update_osm.py (-h | --help)
   update_osm.py --version
 
 Options:
   -h, --help                   Show this screen.
   --version                    Show version.
+  -f, --file <data-file>       Path to the pickle file [default: data-zuerich.pkl].
 """
 
 import sys
@@ -57,7 +58,8 @@ def update_osm_way(row):
         time.sleep(2)
 
 
-filtered_df = pd.read_pickle('data.pkl')
+path = arguments['--file']
+filtered_df = pd.read_pickle(path)
 filtered_df = filtered_df.drop(filtered_df[filtered_df['name:etymology:wikidata'].notna()].index).reset_index(drop=True)
 filtered_df = filtered_df.drop(filtered_df[filtered_df['named_after'].isna()].index).reset_index(drop=True)
 
