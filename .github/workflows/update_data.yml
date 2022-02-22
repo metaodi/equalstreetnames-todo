@@ -6,12 +6,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  update_data:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-
-    steps:
-    - uses: actions/checkout@v2
-    - uses: metaodi/equalstreetnames-todo/.github/workflows/update_city_data.yml@main
-      with:
-        city: zurich
+  update_zurich_data:
+    uses: ./.github/workflows/update_city_data.yml
+    with:
+      city: zurich
+      
+  update_winterthur_data:
+    uses: ./.github/workflows/update_city_data.yml
+    with:
+      city: winterthur
+    
