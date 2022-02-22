@@ -126,4 +126,4 @@ else:
 # filter auf alle die Personen sein könnten: Einträge in der Form «Vorname Name (Jahr-Jahr)»
 filtered_df['named_after'] = filtered_df.apply(named_after, axis=1)
 filtered_df = filtered_df.copy()
-filtered_df.to_pickle('data.pkl')
+filtered_df.to_pickle(f'data-{city}.pkl')
