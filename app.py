@@ -24,10 +24,13 @@ st.set_page_config(page_title="EqualStreetNames - TODO", layout="wide", menu_ite
 st.title('EqualStreetNames - TODO')
 
 @st.cache(ttl=900)
-def load_data(city):
+def load_data(city='zurich'):
     # read data.pkl from GitHub Actions Artifacts
     github_token = os.environ['GITHUB_TOKEN']
-    api = GhApi(owner='metaodi', repo='equalstreetnames-todo', token=github_token)
+    owner = os.getenv('GITHUB_REPO_OWNER', 'metaodi')
+    repo = os.getenv('GITHUB_REPO', 'equalstreetnames-todo')
+
+    api = GhApi(owner=owner, repo=repo, token=github_token)
     artifacts = api.actions.list_artifacts_for_repo()['artifacts']
     latest_artificat = next(filter(lambda x: x['name'] == city, artifacts), {})
     download = api.actions.download_artifact(artifact_id=latest_artificat['id'], archive_format="zip")
@@ -42,17 +45,21 @@ def osm_link(r):
     return f"<a href='https://openstreetmap.org/{r['type']}/{r['id']}'>{r['type']}/{r['id']}</a>"
 
 def wikidata_link(r, attr='wikidata'):
-    if not r[attr] or pd.isna(r[attr]):
+    if attr not in r or not r[attr] or pd.isna(r[attr]):
         return ''
     return f"<a href='https://www.wikidata.org/wiki/{r[attr]}'>{r[attr]}</a>"
 
 
 # select a city
-cities = ['Zürich', 'Winterthur']
+cities = {
+    'zurich': 'Zürich',
+    'winterthur': 'Winterthur',
+}
 selected_city = st.selectbox(
     'Select a city',
-    cities,
-    index=0
+    cities.keys(),
+    index=0,
+    format_func=lambda x: cities[x],
 )
 
 filtered_df = load_data(selected_city).copy()
