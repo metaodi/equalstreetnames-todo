@@ -23,6 +23,28 @@ load_dotenv(find_dotenv())
 st.set_page_config(page_title="EqualStreetNames - TODO", menu_items=None)
 st.title('EqualStreetNames - TODO')
 
+query_params = st.experimental_get_query_params()
+city = query_params.get('city', ['zurich'])[0]
+
+# select a city
+cities = {
+    'zurich': 'Zürich',
+    'winterthur': 'Winterthur',
+}
+options = list(cities.keys())
+selected_city = st.sidebar.selectbox(
+    'Select a city',
+    cities.keys(),
+    index=options.index(city),
+    format_func=lambda x: cities[x],
+)
+st.experimental_set_query_params(city=selected_city)
+
+# add options to sidebar
+empty_name_ety = st.sidebar.checkbox("Only display empty 'name:etymology:wikidata'", value=True)
+empty_named_after = st.sidebar.checkbox("Only display empty 'named_after'", value=True)
+group_by_street = st.sidebar.checkbox("Group by street", value=True)
+
 @st.cache(ttl=900)
 def load_data(city='zurich'):
     # read data.pkl from GitHub Actions Artifacts
@@ -50,20 +72,7 @@ def wikidata_link(r, attr='wikidata'):
     return f"<a href='https://www.wikidata.org/wiki/{r[attr]}'>{r[attr]}</a>"
 
 
-# select a city
-cities = {
-    'zurich': 'Zürich',
-    'winterthur': 'Winterthur',
-}
-selected_city = st.selectbox(
-    'Select a city',
-    cities.keys(),
-    index=0,
-    format_func=lambda x: cities[x],
-)
-
 filtered_df = load_data(selected_city).copy()
-
 
 filtered_df['osm_link'] = filtered_df.apply(osm_link, axis=1)
 filtered_df['wikidata_link'] = filtered_df.apply(wikidata_link, axis=1)
@@ -73,9 +82,6 @@ filtered_df['name_ety_link'] = filtered_df.apply(wikidata_link, args=('name:etym
 
 # display content
 st.header(f"Streets potential named after a person")
-empty_name_ety = st.checkbox("Only display empty 'name:etymology:wikidata'", value=True)
-empty_named_after = st.checkbox("Only display empty 'named_after'", value=True)
-group_by_street = st.checkbox("Group by street", value=True)
 
 if empty_name_ety and 'name:etymology:wikidata' in filtered_df:
     filtered_df = filtered_df.drop(filtered_df[filtered_df['name:etymology:wikidata'].notna()].index).reset_index(drop=True)
