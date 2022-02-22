@@ -2,7 +2,8 @@ name: Update city data
 
 on:
   workflow_call:
-     city:
+    inputs:
+      city:
         description: 'City'
         required: true
         default: 'zurich' 
