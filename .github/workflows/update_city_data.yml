@@ -7,10 +7,7 @@ on:
         description: 'City'
         required: true
         default: 'zurich' 
-        type: choice
-        options:
-        - zurich
-        - winterthur
+        type: string
 
 jobs:
   update_city_data:
