@@ -3,11 +3,12 @@
 """Fetch data from Strassenverzeichnis, Overpass and WikiData
 
 Usage:
-  fetch_data.py
+  fetch_data.py [-c <city>]
   fetch_data.py (-h | --help)
   fetch_data.py --version
 
 Options:
+  -c, --city <city>            Download data for the city [default: zurich].
   -h, --help                   Show this screen.
   --version                    Show version.
 """
@@ -67,6 +68,8 @@ def load_data(wfs_url, layer):
     return str_verz_geo
 
 def named_after(row):
+    if not row['wikidata'] or pd.isna(row['wikidata']):
+        return None
     print(f"Fetch `named after` of {row['wikidata']}")
     wd_item = wikidata_item(row['wikidata'])
     if 'P138' not in wd_item.get('claims', {}):
@@ -78,22 +81,30 @@ def named_after(row):
 load_dotenv(find_dotenv())
 user = os.getenv('OSM_USER')
 pw = os.getenv('OSM_PASS')
+city = arguments['--city']
 
 lv95 = 'EPSG:2056'
 wgs84 = 'EPSG:4326'
 str_verz_layer = 'sv_str_verz'
 wfs_url = 'https://www.ogd.stadt-zuerich.ch/wfs/geoportal/Strassennamenverzeichnis' 
 
-# load data from WFS
-str_verz_geo = load_data(wfs_url, str_verz_layer)
+if city == 'zurich':
+    # load data from WFS
+    str_verz_geo = load_data(wfs_url, str_verz_layer)
 
-str_verz = [{'strassenname': f['properties']['str_name'], 'erlaeutertung': f['properties']['snb_erlaeuterung']} for f in str_verz_geo['features']]
-df_str = pd.DataFrame.from_dict(str_verz)
+    str_verz = [{'strassenname': f['properties']['str_name'], 'erlaeutertung': f['properties']['snb_erlaeuterung']} for f in str_verz_geo['features']]
+    df_str = pd.DataFrame.from_dict(str_verz)
 
 # load data from OSM via Overpass
-streets_query = """
+city_q = 'Q72'
+if city == 'zurich':
+   city_q = 'Q72'
+elif city == 'winterthur':
+   city_q = 'Q9125'
+
+streets_query = f"""
 [out:json][timeout:300];
-( area["admin_level"=""]["wikidata"="Q72"]; )->.a;
+( area["admin_level"=""]["wikidata"="{city_q}"]; )->.a;
 (
     way["highway"]["name"]["highway"!="bus_stop"]["highway"!="elevator"]["highway"!="platform"](area.a);
     way["place"="square"]["name"](area.a);
@@ -106,11 +117,13 @@ osm_result = overpass_query(streets_query)
 osm_df = geopandas.GeoDataFrame.from_features(osm_result, crs=wgs84)
 
 # Join OSM data with Strassenverzeichnis
-merged_df = osm_df.merge(df_str, how="inner", left_on='name', right_on='strassenname')
+if city == 'zurich':
+    merged_df = osm_df.merge(df_str, how="left", left_on='name', right_on='strassenname')
+    filtered_df = merged_df[merged_df['erlaeutertung'].str.match(r'^(.+\(\d{4}-\d{4}\)|.*Vorname)')==True].reset_index(drop=True)
+else:
+    filtered_df = osm_df.copy()
 
 # filter auf alle die Personen sein könnten: Einträge in der Form «Vorname Name (Jahr-Jahr)»
-filtered_df = merged_df[merged_df['erlaeutertung'].str.match(r'^(.+\(\d{4}-\d{4}\)|.*Vorname)')==True].reset_index(drop=True)
-
 filtered_df['named_after'] = filtered_df.apply(named_after, axis=1)
 filtered_df = filtered_df.copy()
 filtered_df.to_pickle('data.pkl')
