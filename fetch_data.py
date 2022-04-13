@@ -95,12 +95,16 @@ if city == 'zurich':
     str_verz = [{'strassenname': f['properties']['str_name'], 'erlaeutertung': f['properties']['snb_erlaeuterung']} for f in str_verz_geo['features']]
     df_str = pd.DataFrame.from_dict(str_verz)
 
+if city == 'basel':
+    pass # TODO: get data from OpenDataBS
+
 # load data from OSM via Overpass
-city_q = 'Q72'
-if city == 'zurich':
-   city_q = 'Q72'
-elif city == 'winterthur':
-   city_q = 'Q9125'
+q_map = {
+    'zurich': 'Q72',
+    'winterthur': 'Q9125',
+    'basel': 'Q78',
+}
+city_q = q_map[city]
 
 streets_query = f"""
 [out:json][timeout:300];
