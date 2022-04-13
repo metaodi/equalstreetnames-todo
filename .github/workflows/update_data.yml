@@ -15,4 +15,9 @@ jobs:
     uses: ./.github/workflows/update_city_data.yml
     with:
       city: winterthur
+
+  update_basel_data:
+    uses: ./.github/workflows/update_city_data.yml
+    with:
+      city: basel
     
