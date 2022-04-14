@@ -29,6 +29,7 @@ city = query_params.get('city', ['zurich'])[0]
 # select a city
 cities = {
     'zurich': 'Zürich',
+    'basel': 'Basel',
     'winterthur': 'Winterthur',
 }
 options = list(cities.keys())
@@ -89,15 +90,15 @@ if empty_name_ety and 'name:etymology:wikidata' in filtered_df:
 if empty_named_after:
     filtered_df = filtered_df.drop(filtered_df[filtered_df['named_after'].notna()].index).reset_index(drop=True)
 
-if group_by_street and 'erlaeutertung' in filtered_df:
+if group_by_street and 'erlaeuterung' in filtered_df:
     filtered_df = filtered_df.copy()
-    filtered_df = filtered_df.groupby(['name', 'erlaeutertung', 'wikidata_link', 'named_after_link', 'name_ety_link'], as_index=False).count()
-    st.write(filtered_df[['name', 'erlaeutertung', 'wikidata_link', 'named_after_link', 'name_ety_link']].to_html(escape=False), unsafe_allow_html=True)
+    filtered_df = filtered_df.groupby(['name', 'erlaeuterung', 'wikidata_link', 'named_after_link', 'name_ety_link'], as_index=False).count()
+    st.write(filtered_df[['name', 'erlaeuterung', 'wikidata_link', 'named_after_link', 'name_ety_link']].to_html(escape=False), unsafe_allow_html=True)
 elif group_by_street:
     filtered_df = filtered_df.groupby(['name', 'wikidata_link', 'named_after_link', 'name_ety_link'], as_index=False).count()
     st.write(filtered_df[['name', 'wikidata_link', 'named_after_link', 'name_ety_link']].to_html(escape=False), unsafe_allow_html=True)
-elif 'erlaeutertung' in filtered_df:
-    st.write(filtered_df[['name', 'erlaeutertung', 'wikidata_link', 'named_after_link', 'osm_link', 'name_ety_link']].to_html(escape=False), unsafe_allow_html=True)
+elif 'erlaeuterung' in filtered_df:
+    st.write(filtered_df[['name', 'erlaeuterung', 'wikidata_link', 'named_after_link', 'osm_link', 'name_ety_link']].to_html(escape=False), unsafe_allow_html=True)
 else:
     st.write(filtered_df[['name', 'wikidata_link', 'named_after_link', 'osm_link', 'name_ety_link']].to_html(escape=False), unsafe_allow_html=True)
 

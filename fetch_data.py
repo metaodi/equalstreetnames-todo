@@ -56,12 +56,12 @@ def wikidata_item(item, endpoint='https://www.wikidata.org/w/api.php'):
     time.sleep(0.1)
     return response.get('entities', {item: {}})[item]
 
-def load_data(wfs_url, layer):
+def load_wfs_data(wfs_url, layer):
     r = requests.get(wfs_url, params={
         'service': 'WFS',
         'version': '1.0.0',
         'request': 'GetFeature',
-        'typename': str_verz_layer,
+        'typename': layer,
         'outputFormat': 'GeoJSON'
     })
     str_verz_geo = r.json()
@@ -85,18 +85,19 @@ city = arguments['--city']
 
 lv95 = 'EPSG:2056'
 wgs84 = 'EPSG:4326'
-str_verz_layer = 'sv_str_verz'
-wfs_url = 'https://www.ogd.stadt-zuerich.ch/wfs/geoportal/Strassennamenverzeichnis' 
 
 if city == 'zurich':
+    str_verz_layer = 'sv_str_verz'
+    wfs_url = 'https://www.ogd.stadt-zuerich.ch/wfs/geoportal/Strassennamenverzeichnis' 
     # load data from WFS
-    str_verz_geo = load_data(wfs_url, str_verz_layer)
+    str_verz_geo = load_wfs_data(wfs_url, str_verz_layer)
 
-    str_verz = [{'strassenname': f['properties']['str_name'], 'erlaeutertung': f['properties']['snb_erlaeuterung']} for f in str_verz_geo['features']]
+    str_verz = [{'strassenname': f['properties']['str_name'], 'erlaeuterung': f['properties']['snb_erlaeuterung']} for f in str_verz_geo['features']]
     df_str = pd.DataFrame.from_dict(str_verz)
 
 if city == 'basel':
-    pass # TODO: get data from OpenDataBS
+    df_bs_str = pd.read_csv('https://data.bs.ch/explore/dataset/100189/download/?format=csv&timezone=Europe/Zurich&lang=en&use_labels_for_header=true&csv_separator=,')
+    df_bs_str['erlaeuterung'] = df_bs_str[['Erklärung erste Zeile', 'Erklärung zweite Zeile']].apply(lambda x: '\n'.join(x.dropna()), axis=1)
 
 # load data from OSM via Overpass
 q_map = {
@@ -122,8 +123,11 @@ osm_df = geopandas.GeoDataFrame.from_features(osm_result, crs=wgs84)
 
 # Join OSM data with Strassenverzeichnis
 if city == 'zurich':
-    merged_df = osm_df.merge(df_str, how="left", left_on='name', right_on='strassenname')
-    filtered_df = merged_df[merged_df['erlaeutertung'].str.match(r'^(.+\(\d{4}-\d{4}\)|.*Vorname)')==True].reset_index(drop=True)
+    merged_df = osm_df.merge(df_str, how="left", left_on='name', right_on='Strassenname')
+    filtered_df = merged_df[merged_df['erlaeuterung'].str.match(r'^(.+\(\d{4}-\d{4}\)|.*Vorname)')==True].reset_index(drop=True)
+elif city == 'basel':
+    merged_df = osm_df.merge(df_bs_str, how="left", left_on='name', right_on='Strassenname')
+    filtered_df = merged_df.copy()
 else:
     filtered_df = osm_df.copy()
 
