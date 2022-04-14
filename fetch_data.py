@@ -97,7 +97,7 @@ if city == 'zurich':
 
 if city == 'basel':
     df_bs_str = pd.read_csv('https://data.bs.ch/explore/dataset/100189/download/?format=csv&timezone=Europe/Zurich&lang=en&use_labels_for_header=true&csv_separator=,')
-    df_bs_str['erlaeuterung'] = df_bs_str[['Erklärung erste Zeile', 'Erklärung zweite Zeile']].apply(lambda x: '\n'.join(x.dropna()), axis=1)
+    df_bs_str['erlaeuterung'] = df_bs_str[['Erklärung erste Zeile', 'Erklärung zweite Zeile']].apply(lambda x: ' '.join(x.dropna()), axis=1)
 
 # load data from OSM via Overpass
 q_map = {
