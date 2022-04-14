@@ -123,7 +123,7 @@ osm_df = geopandas.GeoDataFrame.from_features(osm_result, crs=wgs84)
 
 # Join OSM data with Strassenverzeichnis
 if city == 'zurich':
-    merged_df = osm_df.merge(df_str, how="left", left_on='name', right_on='Strassenname')
+    merged_df = osm_df.merge(df_str, how="left", left_on='name', right_on='strassenname')
     filtered_df = merged_df[merged_df['erlaeuterung'].str.match(r'^(.+\(\d{4}-\d{4}\)|.*Vorname)')==True].reset_index(drop=True)
 elif city == 'basel':
     merged_df = osm_df.merge(df_bs_str, how="left", left_on='name', right_on='Strassenname')
