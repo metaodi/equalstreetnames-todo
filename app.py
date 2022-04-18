@@ -42,8 +42,9 @@ selected_city = st.sidebar.selectbox(
 st.experimental_set_query_params(city=selected_city)
 
 # add options to sidebar
-empty_name_ety = st.sidebar.checkbox("Only display empty 'name:etymology:wikidata'", value=True)
-empty_named_after = st.sidebar.checkbox("Only display empty 'named_after'", value=True)
+empty_name_ety = st.sidebar.checkbox("Only display empty 'name:etymology:wikidata'", value=False)
+empty_named_after = st.sidebar.checkbox("Only display empty 'named_after'", value=False)
+empty_wikidata_link = st.sidebar.checkbox("Only display empty 'wikidata_link'", value=False)
 group_by_street = st.sidebar.checkbox("Group by street", value=True)
 
 @st.cache(ttl=900)
@@ -89,6 +90,9 @@ if empty_name_ety and 'name:etymology:wikidata' in filtered_df:
 
 if empty_named_after:
     filtered_df = filtered_df.drop(filtered_df[filtered_df['named_after'].notna()].index).reset_index(drop=True)
+
+if empty_wikidata_link:
+    filtered_df = filtered_df.drop(filtered_df[filtered_df['wikidata'].notna()].index).reset_index(drop=True)
 
 if group_by_street and 'erlaeuterung' in filtered_df:
     filtered_df = filtered_df.copy()
