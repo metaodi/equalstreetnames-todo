@@ -106,4 +106,4 @@ elif 'erlaeuterung' in filtered_df:
 else:
     st.write(filtered_df[['name', 'wikidata_link', 'named_after_link', 'osm_link', 'name_ety_link']].to_html(escape=False), unsafe_allow_html=True)
 
-st.markdown('&copy; 2022 Stefan Oderbolz | [Github Repository](https://github.com/metaodi/equalstreetnames-todo)')
+st.sidebar.markdown('&copy; 2022 Stefan Oderbolz | [Github Repository](https://github.com/metaodi/equalstreetnames-todo)')
